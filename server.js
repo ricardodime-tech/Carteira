@@ -7,13 +7,12 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3000;
 
 const uri = "mongodb+srv://ricardodime_db_user:VRm9WGOwTzKb1fiq@cluster0.wxgj33t.mongodb.net/";
 const dbName = "Carteira_db";
 const collectionName = "Acoes_clc";
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 app.use(express.json());
 
 // Rota principal (Exibe a tabela na página web)
@@ -48,7 +47,7 @@ app.get('/', async (req, res) => {
             linhasTabela = '<tr><td colspan="7" style="text-align:center;">Nenhuma ação encontrada.</td></tr>';
         }
 
-        const caminhoHtml = path.join(__dirname, 'views', 'index.html');
+        const caminhoHtml = path.join(process.cwd(), 'views', 'index.html');
         let arquivoHtml = fs.readFileSync(caminhoHtml, 'utf8');
         arquivoHtml = arquivoHtml.replace('{{tabelaAcoes}}', linhasTabela);
 
@@ -202,6 +201,13 @@ app.post('/yahoo/atualizar-todos', async (req, res) => {
     }
 });      
 
-app.listen(PORT, () => {
-    console.log(`Servidor rodando com sucesso! Acesse: http://localhost:${PORT}`);
-});
+// Executa localmente caso não esteja em produção (na Vercel)
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = 3000;
+    app.listen(PORT, () => {
+        console.log(`Servidor rodando localmente! Acesse: http://localhost:${PORT}`);
+    });
+}
+
+// Exportação necessária para a Vercel funcionar como Serverless
+module.exports = app;
