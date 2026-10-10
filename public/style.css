@@ -26,13 +26,13 @@ body {
 }
 
 .logo {
-    width: 150px;
-    height: 150px;
+    width: 180px; /* Aumentado de 150px para 180px */
+    height: 180px; /* Aumentado de 150px para 180px */
     object-fit: contain; /* Garante que a imagem não distorça */
 }
 
 .cabecalho h1 {
-    color: #2c3e50;
+    color: #b7950b; /* Tom de dourado mais escuro e elegante */
     margin: 0;
     font-size: 2rem;
 }
