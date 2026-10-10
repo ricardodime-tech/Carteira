@@ -3,23 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carteira de Ações</title>
+    <title>Painel BOVESPA - Ações</title>
     <link rel="stylesheet" href="/style.css">
     <!-- Importa a biblioteca Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Cabeçalho com Logo e Título -->
-        <div class="cabecalho">
-            <img src="/logo.png" alt="Logo da Carteira" class="logo">
-            <h1>Minha Carteira de Ações</h1>
-        </div>
-        
-        <!-- Botões de Ação do Topo -->
-        <div class="topo-acoes">
-            <button class="btn-grafico" onclick="abrirModalGrafico()">Ver Gráfico da Carteira</button>
-            <button class="btn-yahoo-geral" onclick="atualizarTodosYahoo(this)">Atualizar Todos (Yahoo)</button>
+        <!-- Cabeçalho idêntico ao print -->
+        <div class="cabecalho-principal">
+            <div class="cabecalho">
+                <img src="/logo.png" alt="Logo da Carteira" class="logo">
+                <h1>Painel BOVESPA - Ações</h1>
+            </div>
+            
+            <!-- Barra de Ações do Topo (Busca, Data e Botão) -->
+            <div class="topo-acoes">
+                <div class="busca-container">
+                    <input type="text" id="buscarTicker" placeholder="Buscar por ticker..." />
+                </div>
+                <div class="ultima-atualizacao">
+                    Última atualização: <span id="textoUltimaAtualizacao">10/10/2026, 16:15:16</span>
+                </div>
+                <button class="btn-yahoo-geral" onclick="atualizarTodosYahoo(this)">Atualizar cotações</button>
+                <button class="btn-grafico" onclick="abrirModalGrafico()">Ver Gráfico</button>
+            </div>
         </div>
 
         <!-- Formulário para Incluir Novo Ativo -->
@@ -37,11 +45,12 @@
             <thead>
                 <tr>
                     <th>Ticker</th>
-                    <th>Preço</th>
-                    <th>Variação</th>
+                    <th>Nome</th>
+                    <th>Cotação (R$)</th>
+                    <th>Variação R$</th>
+                    <th>Variação Mensal</th>
                     <th>Quantidade</th>
                     <th>Valor Total (VT)</th>
-                    <th>Última Atualização (UA)</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -56,9 +65,7 @@
         <div class="modal-conteudo">
             <span class="fechar" onclick="fecharModalGrafico()">&times;</span>
             <h2>Distribuição da Carteira</h2>
-            <!-- Destaque para o Valor Total da Carteira -->
             <div id="valorTotalCarteira" class="modal-total-carteira">Valor Total: R$ 0,00</div>
-            
             <div class="grafico-container">
                 <canvas id="pizzaChart"></canvas>
             </div>
@@ -159,7 +166,7 @@
         }
 
         async function atualizarTodosYahoo(botao) {
-            botao.innerText = 'Atualizando todos...';
+            botao.innerText = 'Atualizando...';
             botao.disabled = true;
 
             try {
@@ -171,18 +178,17 @@
                     window.location.reload();
                 } else {
                     alert('Erro ao atualizar as cotações.');
-                    botao.innerText = 'Atualizar Todos (Yahoo)';
+                    botao.innerText = 'Atualizar cotações';
                     botao.disabled = false;
                 }
             } catch (error) {
                 console.error('Erro:', error);
                 alert('Erro de conexão ao atualizar o Yahoo Finance.');
-                botao.innerText = 'Atualizar Todos (Yahoo)';
+                botao.innerText = 'Atualizar cotações';
                 botao.disabled = false;
             }
         }
 
-        // Funções para gerenciar a Modal e o Gráfico com Legendas customizadas
         async function abrirModalGrafico() {
             const modal = document.getElementById('modalGrafico');
             modal.style.display = 'flex';
@@ -194,11 +200,9 @@
                 const valores = dados.map(item => parseFloat(item.VT) || 0);
                 const valorTotalGeral = valores.reduce((a, b) => a + b, 0);
 
-                // Exibe o Valor Total da Carteira na modal
                 document.getElementById('valorTotalCarteira').innerText = 
                     `Patrimônio Total: R$ ${valorTotalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-                // Cria os labels combinando Ticker, Valor Total em R$ e a porcentagem exata
                 const labels = dados.map((item, index) => {
                     const val = valores[index];
                     const percentual = valorTotalGeral > 0 ? ((val / valorTotalGeral) * 100).toFixed(1) : 0;
@@ -232,18 +236,7 @@
                                 position: 'bottom',
                                 labels: {
                                     boxWidth: 15,
-                                    font: {
-                                        size: 12
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const valor = context.raw || 0;
-                                        const percentual = valorTotalGeral > 0 ? ((valor / valorTotalGeral) * 100).toFixed(1) : 0;
-                                        return ` Valor: R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})} (${percentual}%)`;
-                                    }
+                                    font: { size: 12 }
                                 }
                             }
                         }
